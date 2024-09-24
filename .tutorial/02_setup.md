@@ -1,3 +1,5 @@
+# Project Setup
+
 Everything should be setup in the Replit, but if you are not using Replit, you can follow along with the instructions below.
 
 Make sure you have Node.js installed.

@@ -30,7 +30,7 @@ const useCashuWallet = (wallet) => {
    * Generate an invoice from the mint, and mint tokens when the invoice gets paid
    * @param {number} amount - amount to receive in sats
    * @param {() => void} handleSuccess - function to call when payment is successful
-   * @returns {string} invoice - and continues to poll until invoice is paid
+   * @returns {Promise<string>} invoice - and continues to poll until invoice is paid
    */
   const receiveLightningPayment = async (amount, handleSuccess) => {
     const mintQuote = await wallet.createMintQuote(amount);
