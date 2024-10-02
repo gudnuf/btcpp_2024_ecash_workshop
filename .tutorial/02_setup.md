@@ -24,26 +24,20 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Boilerplate
+## Bonus
 
-```
-src/
-├── hooks
-│   ├── useCashuWallet.jsx
-│   ├── useProofStorage.jsx
-│   └── useWalletManager.jsx
-├── pages
-│   ├── _app.js
-│   ├── _document.js
-│   └── index.js
-└── styles
-    └── globals.css
+If you really want to learn how to build apps like this using NextJS, start with a fresh project.
+
+To do this, you just need to have Node.js installed, then you can run:
+
+```bash
+npx create-next-app@latest
 ```
 
-### Hooks
+This will create a new NextJS and then you can start the development server:
 
-### Pages
+```bash
+npm run dev
+```
 
-### Styles
-
-Any additional CSS goes in `src/styles/globals.css`, but tailwind should covert most of your styling needs.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

@@ -5,16 +5,21 @@ import { useState, useEffect } from "react";
 import { QRCode } from "react-qrcode";
 
 const Home = () => {
+  /* import functions from hooks */
   const { balance } = useProofStorage(); /* balance of all proofs */
-  const { addWallet, activeWallet } = useWalletManager();
+  const { addWallet, activeWallet, setActiveWallet } = useWalletManager();
   const { receiveLightningPayment, sendLightningPayment } =
     useCashuWallet(activeWallet);
+
+  /* useState to hold input values */
+  const [receiveAmount, setReceiveAmount] = useState("");
+  const [addWalletUrl, setAddWalletUrl] = useState("");
+  const [sendInvoice, setSendInvoice] = useState("");
+
+  /* useState to hold UI state */
   const [showReceiveInput, setShowReceiveInput] = useState(false);
   const [showSendInput, setShowSendInput] = useState(false);
   const [showAddWalletInput, setShowAddWalletInput] = useState(false);
-  const [receiveAmount, setReceiveAmount] = useState("");
-  const [sendInvoice, setSendInvoice] = useState("");
-  const [addWalletUrl, setAddWalletUrl] = useState("");
   const [showQrCode, setShowQrCode] =
     useState(null); /* { title: string, value: string } */
 
@@ -27,10 +32,14 @@ const Home = () => {
     const handleSuccess = () => {
       setShowQrCode(null);
     };
+
     const invoiceToPay = await receiveLightningPayment(
       receiveAmount,
       handleSuccess
     );
+
+    console.log("Invoice to pay:", invoiceToPay);
+
     setShowQrCode({ title: "Lightning Invoice", value: invoiceToPay });
   };
 
@@ -44,7 +53,7 @@ const Home = () => {
   };
 
   return (
-    // container for whole page
+    /* container for whole page */
     <div className="flex flex-col items-center justify-center h-screen space-y-5">
       {/* wallet metadata */}
       <h1>Balance: {balance}</h1>
