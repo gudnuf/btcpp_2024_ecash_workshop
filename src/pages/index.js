@@ -1,144 +1,123 @@
-import { useProofStorage } from "@/hooks/useProofStorage";
-import useCashuWallet from "@/hooks/useCashuWallet";
 import { useWalletManager } from "@/hooks/useWalletManager";
 import { useState, useEffect } from "react";
-import { QRCode } from "react-qrcode";
+import { lookupMint } from "@/utils/cashu";
 
 const Home = () => {
   /* import functions from hooks */
-  const { balance } = useProofStorage(); /* balance of all proofs */
-  const { addWallet, activeWallet, setActiveWallet } = useWalletManager();
-  const { receiveLightningPayment, sendLightningPayment } =
-    useCashuWallet(activeWallet);
+  const { addWallet, activeWallet, wallets, setActiveWallet } =
+    useWalletManager();
 
   /* useState to hold input values */
-  const [receiveAmount, setReceiveAmount] = useState("");
   const [addWalletUrl, setAddWalletUrl] = useState("");
-  const [sendInvoice, setSendInvoice] = useState("");
+  const [addWalletUnit, setAddWalletUnit] = useState("");
 
   /* useState to hold UI state */
-  const [showReceiveInput, setShowReceiveInput] = useState(false);
-  const [showSendInput, setShowSendInput] = useState(false);
-  const [showAddWalletInput, setShowAddWalletInput] = useState(false);
-  const [showQrCode, setShowQrCode] =
-    useState(null); /* { title: string, value: string } */
+  const [supportedUnits, setSupportedUnits] = useState([]);
+  const [mintSearched, setMintSearched] = useState(false);
 
+  /* log active wallet every time it changes */
   useEffect(() => {
     console.log("Active wallet:", activeWallet);
     console.log("Active wallet mint:", activeWallet?.mint.url);
   }, [activeWallet]);
 
-  const handleReceiveSubmit = async () => {
-    const handleSuccess = () => {
-      setShowQrCode(null);
-    };
+  const handleLookupMint = async () => {
+    try {
+      const { units } = await lookupMint(addWalletUrl);
 
-    const invoiceToPay = await receiveLightningPayment(
-      receiveAmount,
-      handleSuccess
-    );
+      /* set state for the UI */
+      setSupportedUnits(units);
+      setAddWalletUnit(units[0] || "");
+      setMintSearched(true);
+    } catch (error) {
+      console.error("Error looking up mint:", error);
 
-    console.log("Invoice to pay:", invoiceToPay);
-
-    setShowQrCode({ title: "Lightning Invoice", value: invoiceToPay });
-  };
-
-  const handleSendSubmit = async () => {
-    await sendLightningPayment(sendInvoice);
+      setSupportedUnits([]);
+      setMintSearched(false);
+    }
   };
 
   const handleAddWallet = async () => {
-    await addWallet(addWalletUrl);
-    setShowAddWalletInput(false);
+    await addWallet(addWalletUrl, addWalletUnit);
+
+    /* reset UI state */
+    setMintSearched(false);
+    setSupportedUnits([]);
+    setAddWalletUrl("");
+    setAddWalletUnit("");
+  };
+
+  const handleWalletChange = (event) => {
+    /* `event` gets created when the wallet gets selected */
+    const selectedWallet = wallets.get(event.target.value);
+    if (selectedWallet) {
+      setActiveWallet(selectedWallet, event.target.value);
+    }
   };
 
   return (
-    /* container for whole page */
-    <div className="flex flex-col items-center justify-center h-screen space-y-5">
-      {/* wallet metadata */}
-      <h1>Balance: {balance}</h1>
-      <h2>
-        Active Wallet: {activeWallet?.mint.mintUrl} {activeWallet?.keys.unit}
-      </h2>
-      {/* receive button */}
-      <div className="flex flex-col space-y-2">
+    <>
+      <h2>Manage Wallets</h2>
+      <div className="flex flex-col space-y-4">
+        {/* Wallet selection dropdown */}
         <div>
-          <button onClick={() => setShowReceiveInput(!showReceiveInput)}>
-            Receive
-          </button>
-          {showReceiveInput && (
-            <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Enter amount"
-                value={receiveAmount}
-                onChange={(e) => setReceiveAmount(e.target.value)}
-                className="ml-2 p-2 border rounded"
-              />
-              <button onClick={handleReceiveSubmit} className="ml-2">
-                Submit
-              </button>
-            </div>
-          )}
+          <h3>Set active wallet</h3>
+          <div className="input-container">
+            <select
+              onChange={handleWalletChange}
+              value={
+                activeWallet
+                  ? Array.from(wallets.keys()).find(
+                      (key) => wallets.get(key) === activeWallet
+                    )
+                  : ""
+              }
+            >
+              <option value="">Select a wallet</option>
+              {Array.from(wallets).map(([keysetId, wallet]) => (
+                <option key={keysetId} value={keysetId}>
+                  {wallet.mint.mintUrl} ({wallet.keys.unit})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-
-        {/* send button */}
-        <div>
-          <button onClick={() => setShowSendInput(!showSendInput)}>Send</button>
-          {showSendInput && (
-            <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Enter lightning invoice"
-                value={sendInvoice}
-                onChange={(e) => setSendInvoice(e.target.value)}
-                className="ml-2 p-2 border rounded"
-              />
-              <button onClick={handleSendSubmit} className="ml-2">
-                Submit
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* add wallet button */}
         <div>
-          <button onClick={() => setShowAddWalletInput(!showAddWalletInput)}>
-            Add wallet
-          </button>
-          {showAddWalletInput && (
-            <div className="flex items-center">
+          <h3>Add a wallet</h3>
+          <div className="flex flex-col ">
+            <div className="input-container">
               <input
                 type="text"
                 placeholder="Enter mint url"
                 value={addWalletUrl}
+                a
                 onChange={(e) => setAddWalletUrl(e.target.value)}
-                className="ml-2 p-2 border rounded"
               />
-              <button onClick={handleAddWallet} className="ml-2">
-                Submit
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* qr code modal */}
-      {showQrCode && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg">
-            <h3 className="text-lg font-bold mb-2">{showQrCode.title}</h3>
-            <QRCode value={showQrCode.value} />
-            <button
-              onClick={() => setShowQrCode(null)}
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Close
-            </button>
+              {mintSearched ? (
+                <>
+                  <p>Select unit:</p>
+                  <select
+                    value={addWalletUnit}
+                    onChange={(e) => setAddWalletUnit(e.target.value)}
+                  >
+                    {supportedUnits.map((unit) => (
+                      <option key={unit} value={unit}>
+                        {unit}
+                      </option>
+                    ))}
+                  </select>
+                  <button onClick={handleAddWallet}>Submit</button>
+                </>
+              ) : (
+                <button onClick={handleLookupMint}>Search</button>
+              )}
+            </div>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
 

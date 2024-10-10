@@ -50,8 +50,6 @@ const setStoredProofs = (proofs) => {
 export const ProofProvider = ({ children }) => {
   const [proofs, setProofs] = useState([]); /* all proofs */
   const [isLoading, setIsLoading] = useState(true);
-  const [lockedBalance, setLockedBalance] =
-    useState(null); /* stops the balance from changing during transactions */
 
   /* load proofs from localStorage on mount */
   useEffect(() => {
@@ -74,27 +72,21 @@ export const ProofProvider = ({ children }) => {
     });
 
     return {
-      balance: lockedBalance !== null ? lockedBalance : totalBalance,
+      balance: totalBalance,
       balanceByWallet: newBalanceByWallet,
     };
-  }, [proofs, lockedBalance]);
-
-  /* set the locked balance to the current balance */
-  const lockBalance = useCallback(() => {
-    setLockedBalance(balance);
-  }, [balance]);
-
-  /* set the locked balance to null to unlock */
-  const unlockBalance = () => {
-    setLockedBalance(null);
-  };
+  }, [proofs]);
 
   /**
    * Add proofs to localStorage
    * @param {Proof[]} newProofs - proofs to add
    */
   const addProofs = (newProofs) => {
+    /* gets proofs directly from localStorage to make sure we get the latest */
+    /* NOTE: would be better to get proofs from our state, but I could not figure out how to make that work reliably */
     const currentProofs = getStoredProofs();
+
+    /* make sure we don't add any duplicates */
     const existingSecrets = new Set(currentProofs.map((p) => p.secret));
     const proofsToAdd = newProofs.filter((proof) => {
       if (existingSecrets.has(proof.secret)) {
@@ -102,12 +94,17 @@ export const ProofProvider = ({ children }) => {
       }
       return true;
     });
+
+    /* update state */
     const updatedProofs = [...currentProofs, ...proofsToAdd];
     setStoredProofs(updatedProofs);
     setProofs(updatedProofs);
   };
 
-  /* once proofs are spent, remove them  */
+  /**
+   * once proofs are spent, remove them
+   * @param {Proof[]} proofsToRemove - proofs to remove
+   * */
   const removeProofs = (proofsToRemove) => {
     const currentProofs = getStoredProofs();
     const existingSecrets = new Set(currentProofs.map((p) => p.secret));
@@ -123,7 +120,12 @@ export const ProofProvider = ({ children }) => {
     setProofs(proofsToKeep);
   };
 
-  /* only get the needed proofs for the given amount */
+  /**
+   * only get the needed proofs for the given amount
+   * @param {*} amount
+   * @param {*} keysetId
+   * @returns
+   */
   const getProofsByAmount = (amount, keysetId) => {
     const currentProofs = getStoredProofs();
     const result = [];
@@ -147,24 +149,15 @@ export const ProofProvider = ({ children }) => {
     [proofs]
   );
 
-  /* delets all proofs */
-  const clearProofs = () => {
-    setProofs([]);
-    setStoredProofs([]);
-  };
-
   /* values we can use in the app */
   const value = {
     balance,
+    isLoading,
+    balanceByWallet,
     addProofs,
     removeProofs,
     getProofsByAmount,
-    clearProofs,
-    isLoading,
     getAllProofsByKeysetId,
-    balanceByWallet,
-    lockBalance,
-    unlockBalance,
   };
 
   return (

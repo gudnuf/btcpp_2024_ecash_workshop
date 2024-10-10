@@ -34,7 +34,7 @@ To do this, you just need to have Node.js installed, then you can run:
 npx create-next-app@latest
 ```
 
-This will create a new NextJS and then you can start the development server:
+This will create a new NextJS app and then you can start the development server:
 
 ```bash
 npm run dev

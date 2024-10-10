@@ -17,7 +17,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Space Grotesk", sans-serif;
 }
 
 @layer utilities {
@@ -32,4 +32,24 @@ h1 {
 
 button {
   @apply bg-foreground text-background font-bold py-2 px-4 rounded;
+}
+
+input {
+  @apply p-2 mb-2 border rounded text-black;
+}
+
+select {
+  @apply p-2 border rounded text-black mb-2;
+}
+
+h2 {
+  @apply text-3xl underline;
+}
+
+h3 {
+  @apply text-xl mb-4;
+}
+
+.input-container {
+  @apply ml-2 flex flex-col;
 }
