@@ -8,6 +8,10 @@ Here you will see everything that is imported from [useWalletManager.js](../src/
 
 You will also notice we import `lookupMint` from [utils/cashu](../src/utils/cashu.ts) which will help us find the the units that mint supports.
 
+## Find a mint
+
+You can use a testmint (https://nofees.testnut.cashu.space, https://testnut.cashu.space) to test out the app or head to [Bitcoin Mints](https://bitcoinmints.com/) to find a mint.
+
 ## Get mint's supported units
 
 Lets start by implementing `lookupMint`.

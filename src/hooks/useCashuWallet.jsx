@@ -35,53 +35,7 @@ const useCashuWallet = (wallet) => {
    * @param {() => void} handleSuccess - function to call when payment is successful
    * @returns {Promise<string>} invoice - and continues to poll until invoice is paid
    */
-  const receiveLightningPayment = async (amount, handleSuccess) => {
-    const mintQuote = await wallet.createMintQuote(amount);
-    const invoice = mintQuote.request;
-    const quoteId = mintQuote.quote;
-
-    addPendingMintQuote(mintQuote);
-
-    console.log("Mint quote:", mintQuote);
-
-    // TODO: we should store the mint quote until we have minted tokens
-    // because the invoice might get paid, but if we stop polling (refresh etc.), we will
-    // not be able to mint tokens
-
-    /* poll for invoice payment */
-    const startPolling = () => {
-      const interval = setInterval(async () => {
-        try {
-          /* check mint quote status */
-          const quote = await wallet.checkMintQuote(quoteId);
-          console.log("Quote status:", quote);
-          if (quote.state === MintQuoteState.PAID) {
-            /* mint tokens */
-            const { proofs } = await wallet.mintTokens(amount, quoteId);
-            addProofs(proofs); /* store created proofs */
-            clearInterval(interval); /* stop polling */
-            handleSuccess(); /* call success callback */
-            removePendingMintQuote(quoteId);
-          } else if (quote.state === MintQuoteState.ISSUED) {
-            /* shouldn't happen, but just in case */
-            console.warn("Mint quote issued");
-            clearInterval(interval); /* stop polling */
-            removePendingMintQuote(quoteId);
-          } else if (quote.state === MintQuoteState.UNPAID) {
-            console.log("Waiting for payment...", mintQuote);
-          } else {
-            console.warn("Unknown mint quote state:", quote.state);
-          }
-        } catch (error) {
-          console.error("Error while polling for payment:", error);
-        }
-      }, 5000); // Poll every 5 seconds
-      setPollInterval(interval);
-    };
-
-    startPolling();
-    return invoice;
-  };
+  const receiveLightningPayment = async (amount, handleSuccess) => {};
 
   /**
    * Use locally stored proofs to pay an invoice
