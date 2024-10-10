@@ -41,34 +41,7 @@ const useCashuWallet = (wallet) => {
    * Use locally stored proofs to pay an invoice
    * @param {string} invoice - lightning invoice to pay
    */
-  const sendLightningPayment = async (invoice) => {
-    const meltQuote = await wallet.createMeltQuote(invoice);
-
-    /* mint will reserve a fee for the lightning payment */
-    const amount = meltQuote.amount + meltQuote.fee_reserve;
-
-    /* this just reads from local storage, but does not delete */
-    const proofsToSend = getProofsByAmount(amount, wallet.keys.id);
-
-    if (!proofsToSend) {
-      throw new InsufficientBalanceError(balance, amount);
-    }
-
-    const { change, isPaid, preimage } = await wallet.meltTokens(
-      meltQuote,
-      proofsToSend
-    );
-
-    addProofs(change);
-
-    if (isPaid) {
-      console.log("Payment was successful", preimage);
-      /* delete proofs we pulled from local storage */
-      removeProofs(proofsToSend);
-    } else {
-      console.log("Payment failed");
-    }
-  };
+  const sendLightningPayment = async (invoice) => {};
 
   /**
    * Swap proofs from one wallet to another
