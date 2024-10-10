@@ -79,88 +79,8 @@ export const WalletProvider = ({ children }) => {
 
   useEffect(() => {
     /* initialize wallets from mint data in localStorage */
-    const load = async () => {
-      const mintUrls = JSON.parse(localStorage.getItem("mintUrls") || "[]");
+    const load = async () => {};
 
-      console.log("Loading wallets for mint urls:", mintUrls);
-
-      /** @type {Array<{url: string, keysetId: string, unit: string, keys: MintKeys}>} */
-      const walletsToInitialize = mintUrls.flatMap((url) => {
-        const mintData = JSON.parse(localStorage.getItem(url) || "{}");
-
-        if (!mintData.keysets || mintData.keysets.length === 0) {
-          console.warn(`No keysets found for ${url}`);
-          return [];
-        }
-
-        return mintData.keysets.map((keyset) => ({
-          ...keyset,
-          url,
-        }));
-      });
-
-      const walletsTemp = new Map();
-      const mintKeysets = new Map();
-
-      for await (const walletData of walletsToInitialize) {
-        const mint = new CashuMint(walletData.url);
-
-        let keysets;
-        if (!mintKeysets.has(walletData.url)) {
-          try {
-            keysets = await mint.getKeySets();
-            mintKeysets.set(walletData.url, keysets);
-          } catch (error) {
-            console.warn(
-              `Failed to fetch keysets for ${walletData.url}. Using local data.`
-            );
-            keysets = { keysets: [{ id: walletData.keysetId, active: true }] };
-          }
-        } else {
-          keysets = mintKeysets.get(walletData.url);
-        }
-
-        const keyset = keysets.keysets.find(
-          (keyset) => keyset.id === walletData.keysetId
-        );
-
-        if (!keyset) {
-          console.warn(`Keyset ${walletData.keysetId} not found`);
-        }
-        if (keyset && keyset.active !== true) {
-          console.warn(
-            `Keyset ${walletData.keysetId} is no longer active, you should rotate to the new keyset`
-          );
-        }
-
-        const wallet = new CashuWallet(mint, {
-          keys: {
-            unit: walletData.unit,
-            id: walletData.keysetId,
-            keys: walletData.keys,
-          },
-        });
-
-        walletsTemp.set(walletData.keysetId, wallet);
-      }
-
-      setWallets(walletsTemp);
-      console.log("Wallets loaded:", walletsTemp);
-
-      /* Set active wallet from local storage */
-      const activeWalletKeysetId = localStorage.getItem("activeWalletKeysetId");
-      console.log("Active wallet keyset id:", activeWalletKeysetId);
-
-      if (activeWalletKeysetId && walletsTemp.has(activeWalletKeysetId)) {
-        setActiveWallet(
-          walletsTemp.get(activeWalletKeysetId),
-          activeWalletKeysetId
-        );
-      } else if (walletsTemp.size > 0) {
-        const firstWallet = walletsTemp.entries().next().value;
-        setActiveWallet(firstWallet[1], firstWallet[0]);
-      }
-    };
     load().then(() => setIsLoading(false));
 
     const pendingMintQuotes = JSON.parse(
