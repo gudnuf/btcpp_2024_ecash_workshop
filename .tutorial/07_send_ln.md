@@ -91,3 +91,5 @@ const sendLightningPayment = async (invoice) => {
   }
 };
 ```
+
+Next up, transfer funds from one mint to the next.
