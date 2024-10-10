@@ -169,34 +169,7 @@ export const WalletProvider = ({ children }) => {
     setPendingMintQuotes(pendingMintQuotes);
   }, []);
 
-  const addWallet = async (url, unit = "sat") => {
-    console.log("Adding wallet:", url, unit);
-
-    console.log("Fetching keys...");
-    const mint = new CashuMint(url);
-    const keysets = await mint.getKeySets();
-    const keysetForUnit = keysets.keysets.find(
-      (keyset) => keyset.unit === unit && /^[0-9A-Fa-f]+$/.test(keyset.id)
-    );
-    if (!keysetForUnit) {
-      throw new Error(`No keyset found for unit ${unit}`);
-    }
-    console.log("Found keyset:", keysetForUnit);
-    const keysResponse = await mint.getKeys(keysetForUnit.id);
-    const keys = keysResponse.keysets.find((k) => k.id === keysetForUnit.id);
-    const walletOptions = {
-      unit,
-      keys,
-      mnemonicOrSeed: undefined,
-    };
-    console.log("Creating wallet:", walletOptions);
-    const wallet = new CashuWallet(mint, walletOptions);
-    setWallets((wallets) => new Map([...wallets, [keysetForUnit.id, wallet]]));
-    addWalletToLocalStorage(url, keysetForUnit.id, unit, keys);
-    if (activeWallet === null) {
-      setActiveWallet(wallet, keysetForUnit.id);
-    }
-  };
+  const addWallet = async (url, unit = "sat") => {};
 
   const setActiveWallet = (wallet, keysetId) => {
     if (wallet && keysetId) {
