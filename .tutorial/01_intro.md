@@ -40,8 +40,10 @@ However, there are some nice to haves that I will cover briefly:
 
 ```json
 {
+  "quote": <str>,
   "request": <str>,
-  "unit": <str_enum["sat"]>
+  "state": <str_enum[STATE]>,
+  "expiry": <int>
 }
 ```
 
@@ -56,9 +58,12 @@ However, there are some nice to haves that I will cover briefly:
 
 ```json
 {
+  "quote": <str>,
   "amount": <int>,
-  "unit": <str_enum["sat"]>,
-  "description": <str|null>
+  "fee_reserve": <int>,
+  "state": <str_enum[STATE]>,
+  "expiry": <int>,
+  "payment_preimage": <str|null>
 }
 ```
 
@@ -132,7 +137,7 @@ The sum of the two numbers.
 
 I chose to write the code for this workshop in JavaScript for simplicity, but using JSDoc allows for variables to be assigned types. This is just a nice-to-have mostly because of IDE support that allows us to see the types of variables and functions.
 
-### terminology
+### Terminology
 
 #### proof vs token
 

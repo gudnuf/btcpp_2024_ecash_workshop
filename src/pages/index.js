@@ -68,7 +68,7 @@ const Home = () => {
               value={
                 activeWallet
                   ? Array.from(wallets.keys()).find(
-                      (key) => wallets.get(key) === activeWallet
+                      (key) => wallets.get(key) === activeWallet,
                     )
                   : ""
               }
