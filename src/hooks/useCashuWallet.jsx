@@ -1,6 +1,7 @@
 import { CashuWallet, MintQuoteState, Proof } from "@cashu/cashu-ts";
 import { useState, useEffect } from "react";
 import { useProofStorage } from "./useProofStorage";
+import { useWalletManager } from "./useWalletManager";
 
 class InsufficientBalanceError extends Error {
   constructor(balance, amount) {
@@ -15,6 +16,7 @@ class InsufficientBalanceError extends Error {
 const useCashuWallet = (wallet) => {
   const { addProofs, removeProofs, getProofsByAmount, balance } =
     useProofStorage();
+  const { addPendingMintQuote, removePendingMintQuote } = useWalletManager();
 
   const [pollInterval, setPollInterval] = useState(null);
 
@@ -38,6 +40,8 @@ const useCashuWallet = (wallet) => {
     const invoice = mintQuote.request;
     const quoteId = mintQuote.quote;
 
+    addPendingMintQuote(mintQuote);
+
     console.log("Mint quote:", mintQuote);
 
     // TODO: we should store the mint quote until we have minted tokens
@@ -57,10 +61,12 @@ const useCashuWallet = (wallet) => {
             addProofs(proofs); /* store created proofs */
             clearInterval(interval); /* stop polling */
             handleSuccess(); /* call success callback */
+            removePendingMintQuote(quoteId);
           } else if (quote.state === MintQuoteState.ISSUED) {
             /* shouldn't happen, but just in case */
             console.warn("Mint quote issued");
             clearInterval(interval); /* stop polling */
+            removePendingMintQuote(quoteId);
           } else if (quote.state === MintQuoteState.UNPAID) {
             console.log("Waiting for payment...", mintQuote);
           } else {

@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { CashuMint, CashuWallet, MintKeys } from "@cashu/cashu-ts";
+import {
+  CashuMint,
+  CashuWallet,
+  MintKeys,
+  MintQuoteResponse,
+} from "@cashu/cashu-ts";
 
 /**
  * @typedef {Object} WalletContextType
@@ -8,6 +13,9 @@ import { CashuMint, CashuWallet, MintKeys } from "@cashu/cashu-ts";
  * @property {(url: string, unit?: string) => Promise<void>} addWallet - Function to add a new wallet
  * @property {CashuWallet | null} activeWallet - Currently active wallet
  * @property {(wallet: CashuWallet, keysetId: string) => void} setActiveWallet - Function to set the active wallet
+ * @property {Array<MintQuoteResponse>} pendingMintQuotes
+ * @property {(quote: MintQuoteResponse) => void} addPendingMintQuote
+ * @property {(quoteId: string) => void} removePendingMintQuote
  */
 
 /** @type {React.Context<WalletContextType | undefined>} */
@@ -67,6 +75,7 @@ export const WalletProvider = ({ children }) => {
   const [wallets, setWallets] = useState(new Map());
   const [activeWallet, setActiveWalletState] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingMintQuotes, setPendingMintQuotes] = useState([]);
 
   useEffect(() => {
     /* initialize wallets from mint data in localStorage */
@@ -153,6 +162,11 @@ export const WalletProvider = ({ children }) => {
       }
     };
     load().then(() => setIsLoading(false));
+
+    const pendingMintQuotes = JSON.parse(
+      localStorage.getItem("pendingMintQuotes") || "[]"
+    );
+    setPendingMintQuotes(pendingMintQuotes);
   }, []);
 
   const addWallet = async (url, unit = "sat") => {
@@ -196,6 +210,24 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
+  const addPendingMintQuote = (quote) => {
+    setPendingMintQuotes((pendingMintQuotes) => {
+      const newMintQuotes = [...pendingMintQuotes, quote];
+      localStorage.setItem("pendingMintQuotes", JSON.stringify(newMintQuotes));
+      return newMintQuotes;
+    });
+  };
+
+  const removePendingMintQuote = (quoteId) => {
+    setPendingMintQuotes((pendingMintQuotes) => {
+      const newMintQuotes = pendingMintQuotes.filter(
+        (quote) => quote.quote !== quoteId
+      );
+      localStorage.setItem("pendingMintQuotes", JSON.stringify(newMintQuotes));
+      return newMintQuotes;
+    });
+  };
+
   /** @type {WalletContextType} */
   const value = {
     wallets,
@@ -203,6 +235,9 @@ export const WalletProvider = ({ children }) => {
     addWallet,
     activeWallet,
     setActiveWallet,
+    pendingMintQuotes,
+    addPendingMintQuote,
+    removePendingMintQuote,
   };
 
   return (

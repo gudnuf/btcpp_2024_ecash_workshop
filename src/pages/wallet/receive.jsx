@@ -4,7 +4,7 @@ import useCashuWallet from "@/hooks/useCashuWallet";
 import { useWalletManager } from "@/hooks/useWalletManager";
 
 const Receive = () => {
-  const { activeWallet } = useWalletManager();
+  const { activeWallet, pendingMintQuotes } = useWalletManager();
   const { receiveLightningPayment } = useCashuWallet(activeWallet);
 
   const [receiveAmount, setReceiveAmount] = useState("");
@@ -49,6 +49,18 @@ const Receive = () => {
           />
           <button onClick={handleReceiveSubmit}>Generate Invoice</button>
         </div>
+        {pendingMintQuotes.length > 0 && (
+          <div className="flex flex-col space-y-2">
+            <h3>Pending Mint Quotes</h3>
+            {pendingMintQuotes.map((quote) => (
+              <div key={quote.quote} className="flex flex-col space-y-2">
+                <p>
+                  {quote.quote} - {quote.state}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showQrCode && (
