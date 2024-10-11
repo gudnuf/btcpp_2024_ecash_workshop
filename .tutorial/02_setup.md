@@ -7,7 +7,7 @@ Make sure you have Node.js installed.
 Clone the repo:
 
 ```bash
-git clone https://github.com/CashuBTC/btcpp_2024_ecash_workshop.git
+git clone https://github.com/gudnuf/btcpp_2024_ecash_workshop.git
 ```
 
 Install dependencies:
